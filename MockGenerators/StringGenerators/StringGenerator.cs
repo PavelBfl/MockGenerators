@@ -8,7 +8,7 @@ namespace MockGenerators.StringGenerators
 	/// <summary>
 	/// Генератор значений типа <see cref="string"/>
 	/// </summary>
-	public class StringGenerator : ValueGenerator, IValueGenerator<string>
+	public class StringGenerator : ValueGenerator<string>
 	{
 		/// <summary>
 		/// Значение по умолчанию для максимальной длины генерируемой строки
@@ -29,24 +29,26 @@ namespace MockGenerators.StringGenerators
 			}
 		}
 
-		public StringGenerator(Random random)
-			: base(random)
+		public StringGenerator(int seed)
+			: base(seed)
 		{
 			UsedChars = GetDefaultChars().ToArray();
+			CollectionGenerator = new CollectionGenerator<char>(seed, 0, MaxLength, new ItemProviderGenerator<char>(seed, UsedChars));
 		}
-		public StringGenerator(Random random, IEnumerable<char> usedChars, int maxLength)
-			: base(random)
+		public StringGenerator(int seed, IEnumerable<char> usedChars, int maxLength)
+			: base(seed)
 		{
 			UsedChars = usedChars?.Distinct().ToArray() ?? throw new NullReferenceException();
 			MaxLength = maxLength >= 0 ? maxLength : throw new ArgumentOutOfRangeException();
+			CollectionGenerator = new CollectionGenerator<char>(seed, 0, MaxLength, new ItemProviderGenerator<char>(seed, UsedChars));
 		}
-		public StringGenerator(Random random, IEnumerable<char> usedChars)
-			: this(random, usedChars, DEFAULT_MAX_LENGTH)
+		public StringGenerator(int seed, IEnumerable<char> usedChars)
+			: this(seed, usedChars, DEFAULT_MAX_LENGTH)
 		{
 			
 		}
-		public StringGenerator(Random random, int maxLength)
-			: this(random, GetDefaultChars(), DEFAULT_MAX_LENGTH)
+		public StringGenerator(int seed, int maxLength)
+			: this(seed, GetDefaultChars(), maxLength)
 		{
 
 		}
@@ -59,19 +61,14 @@ namespace MockGenerators.StringGenerators
 		/// Коллекция используемых символов при генерации
 		/// </summary>
 		public IReadOnlyList<char> UsedChars { get; } = null;
-
 		/// <summary>
-		/// Генерировать новое значение
+		/// Генератор символов
 		/// </summary>
-		/// <returns>Новое сгенерированое значение</returns>
-		public string Generate()
+		private CollectionGenerator<char> CollectionGenerator { get; } = null;
+
+		protected override string Generate(Random random)
 		{
-			var chars = new char[Random.Next(MaxLength + 1)];
-			for (int i = 0; i < chars.Length; i++)
-			{
-				chars[i] = UsedChars[Random.Next(UsedChars.Count)];
-			}
-			return new string(chars);
+			return new string(CollectionGenerator.First().ToArray());
 		}
 	}
 }

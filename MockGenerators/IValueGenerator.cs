@@ -8,12 +8,8 @@ namespace MockGenerators
 	/// Генератор значений
 	/// </summary>
 	/// <typeparam name="T">Тип генерируемого значения</typeparam>
-	public interface IValueGenerator<T>
+	public interface IValueGenerator<T> : IEnumerable<T>
 	{
-		/// <summary>
-		/// Сгенерировать новое значение
-		/// </summary>
-		/// <returns>Новое значение</returns>
-		T Generate();
+		
 	}
 }

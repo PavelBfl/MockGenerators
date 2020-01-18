@@ -4,16 +4,16 @@ using System.Text;
 
 namespace MockGenerators.DoubleGenerators
 {
-	public class DoubleGenerator : ValueGenerator, IValueGenerator<double>
+	public class DoubleGenerator : ValueGenerator<double>
 	{
-		public DoubleGenerator(Random random)
-			: base(random)
+		public DoubleGenerator(int seed)
+			: base(seed)
 		{
 		}
 
-		public double Generate()
+		protected override double Generate(Random random)
 		{
-			return Random.NextDouble();
+			return random.NextDouble();
 		}
 	}
 }

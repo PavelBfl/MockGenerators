@@ -8,15 +8,15 @@ namespace MockGenerators
 	/// Генератор значений внутри диапазона
 	/// </summary>
 	/// <typeparam name="T">Тип генерируемого значения</typeparam>
-	public class ValueRangeGenerator<T> : ValueGenerator
+	public abstract class ValueRangeGenerator<T> : ValueGenerator<T>
 	{
-		public ValueRangeGenerator(Random random, T min, T max)
-			: this(random, new Range<T>(min, max))
+		public ValueRangeGenerator(int seed, T min, T max)
+			: this(seed, new Range<T>(min, max))
 		{
 
 		}
-		private ValueRangeGenerator(Random random, Range<T> range)
-			: base(random)
+		private ValueRangeGenerator(int seed, Range<T> range)
+			: base(seed)
 		{
 			Range = range;
 		}

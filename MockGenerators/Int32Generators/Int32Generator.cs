@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,16 +8,16 @@ namespace MockGenerators.Int32Generators
 	/// <summary>
 	/// Генератор чисел типа <see cref="int"/>
 	/// </summary>
-	public class Int32Generator : ValueGenerator, IValueGenerator<int>
+	public class Int32Generator : ValueGenerator<int>
 	{
-		public Int32Generator(Random random)
-			: base(random)
+		public Int32Generator(int seed)
+			: base(seed)
 		{
 		}
 
-		public int Generate()
+		protected override int Generate(Random random)
 		{
-			return Random.Next();
+			return random.Next();
 		}
 	}
 }

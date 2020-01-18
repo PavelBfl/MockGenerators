@@ -6,17 +6,17 @@ namespace MockGenerators.DoubleGenerators
 {
 	public class DoubleUniqueGenerator : ValueUniqueGenerator<double>
 	{
-		public DoubleUniqueGenerator(IValueGenerator<double> baseGenerator, DoubleComparer comparer)
-			: base(baseGenerator)
+		public DoubleUniqueGenerator(IValueGenerator<double> baseGenerator, DoubleComparer equalityComparer)
+			: base(baseGenerator, equalityComparer)
 		{
-			Comparer = comparer ?? throw new NullReferenceException(nameof(comparer));
+			DoubleComparer = equalityComparer ?? throw new NullReferenceException(nameof(equalityComparer));
 		}
 
-		public DoubleComparer Comparer { get; } = null;
+		public DoubleComparer DoubleComparer { get; } = null;
 
 		protected override double Increment(double value)
 		{
-			return value + Comparer.Epsilon;
+			return value + DoubleComparer.Epsilon;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,16 +8,16 @@ namespace MockGenerators.Int32Generators
 	/// <summary>
 	/// Генератор чисел типа <see cref="int"/> ограниченых диапазоном
 	/// </summary>
-	public class Int32RangeGenerator : ValueRangeGenerator<int>, IValueGenerator<int>
+	public class Int32RangeGenerator : ValueRangeGenerator<int>
 	{
-		public Int32RangeGenerator(Random random, int min, int max)
-			: base(random, min, max)
+		public Int32RangeGenerator(int seed, int min, int max)
+			: base(seed, min, max)
 		{
 		}
 
-		public int Generate()
+		protected override int Generate(Random random)
 		{
-			return Random.Next(Range.Max - Range.Min) + Range.Min;
+			return random.Next(Range.Min, Range.Max);
 		}
 	}
 }

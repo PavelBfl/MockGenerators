@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MockGenerators
@@ -8,51 +10,81 @@ namespace MockGenerators
 	/// Базовый объект для генерации уникальных значений
 	/// </summary>
 	/// <typeparam name="T">Тип генерируемых значений</typeparam>
-	public abstract class ValueUniqueGenerator<T> : IValuesUniqueGenerator<T>
+	public abstract class ValueUniqueGenerator<T> : IValueGenerator<T>
 	{
-		public ValueUniqueGenerator(IValueGenerator<T> baseGenerator)
+		public ValueUniqueGenerator(IValueGenerator<T> baseGenerator, IEqualityComparer<T> equalityComparer = null)
 		{
 			BaseGenerator = baseGenerator ?? throw new NullReferenceException(nameof(baseGenerator));
+			EqualityComparer = equalityComparer ?? EqualityComparer<T>.Default;
 		}
 		/// <summary>
 		/// Источник генерируемых значений
 		/// </summary>
-		private IValueGenerator<T> BaseGenerator { get; } = null;
+		public IValueGenerator<T> BaseGenerator { get; } = null;
+		/// <summary>
+		/// Объект сравнения значений
+		/// </summary>
+		public IEqualityComparer<T> EqualityComparer { get; } = null;
 
-		/// <summary>
-		/// Хеш ранее сгенерированых значений
-		/// </summary>
-		private readonly SortedSet<T> oldValues = new SortedSet<T>();
-
-		/// <summary>
-		/// Перезапустить генератор
-		/// </summary>
-		public void Reset()
-		{
-			oldValues.Clear();
-		}
-		/// <summary>
-		/// Генерировать уникальное значение
-		/// </summary>
-		/// <returns>Новое значение</returns>
-		public T Generate()
-		{
-			var result = BaseGenerator.Generate();
-			foreach (var oldValue in oldValues)
-			{
-				while (EqualityComparer<T>.Default.Equals(result, oldValue))
-				{
-					result = Increment(result);
-				}
-			}
-			oldValues.Add(result);
-			return result;
-		}
 		/// <summary>
 		/// Инкрементировать значение
 		/// </summary>
 		/// <param name="value">Текущее значение</param>
 		/// <returns>Инкрементированое значение</returns>
 		protected abstract T Increment(T value);
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return new Enumerable(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		private class Enumerable : IEnumerator<T>
+		{
+			public Enumerable(ValueUniqueGenerator<T> owner)
+			{
+				Owner = owner ?? throw new NullReferenceException();
+				OldValues = new HashSet<T>(Owner.EqualityComparer);
+			}
+
+			/// <summary>
+			/// Владелец итератора
+			/// </summary>
+			public ValueUniqueGenerator<T> Owner { get; } = null;
+
+			public T Current { get; private set; } = default;
+
+			object IEnumerator.Current => Current;
+
+			/// <summary>
+			/// Хеш ранее сгенерированых значений
+			/// </summary>
+			private HashSet<T> OldValues = null;
+
+			public bool MoveNext()
+			{
+				var current = Owner.BaseGenerator.First();
+				while (OldValues.Contains(current))
+				{
+					current = Owner.Increment(current);
+				}
+				Current = current;
+				return true;
+			}
+
+			public void Reset()
+			{
+				OldValues.Clear();
+			}
+
+			public void Dispose()
+			{
+				
+			}
+		}
 	}
 }

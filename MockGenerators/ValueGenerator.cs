@@ -9,11 +9,14 @@ namespace MockGenerators
 	/// </summary>
 	public class ValueGenerator
 	{
-		public ValueGenerator(Random random)
+		public ValueGenerator(int seed)
 		{
-			Random = random ?? throw new NullReferenceException();
+			Seed = seed;
 		}
 
-		protected Random Random { get; } = null;
+		/// <summary>
+		/// Зерно генерации значений
+		/// </summary>
+		protected int Seed { get; } = 0;
 	}
 }

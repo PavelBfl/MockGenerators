@@ -9,22 +9,22 @@ namespace MockGenerators
 	/// Генератор коллекций элементов
 	/// </summary>
 	/// <typeparam name="T">Тип элемента коллекции</typeparam>
-	public class CollectionGenerator<T> : ValueGenerator, IValueGenerator<IEnumerable<T>>
+	public class CollectionGenerator<T> : ValueGenerator<IEnumerable<T>>
 	{
-		public CollectionGenerator(Random random, int lengthMin, IEnumerable<IValueGenerator<T>> itemsGenerators)
-			: base(random)
+		public CollectionGenerator(int seed, int lengthMin, IEnumerable<IValueGenerator<T>> itemsGenerators)
+			: base(seed)
 		{
 			ItemsGenerators = (itemsGenerators ?? throw new NullReferenceException(nameof(itemsGenerators))).ToArray();
 
 			LengthMin = lengthMin <= ItemsGenerators.Count ? lengthMin : throw new ArgumentOutOfRangeException();
 		}
-		public CollectionGenerator(Random random, int lengthMin, int lengthMax, IValueGenerator<T> itemsGenerator)
-			: this(random, lengthMin, Enumerable.Range(0, lengthMax).Select(_ => itemsGenerator))
+		public CollectionGenerator(int seed, int lengthMin, int lengthMax, IValueGenerator<T> itemsGenerator)
+			: this(seed, lengthMin, Enumerable.Range(0, lengthMax).Select(_ => itemsGenerator))
 		{
 
 		}
-		public CollectionGenerator(Random random, int lengthMax, IValueGenerator<T> itemsGenerator)
-			: this(random, 0, Enumerable.Range(0, lengthMax).Select(_ => itemsGenerator))
+		public CollectionGenerator(int seed, int lengthMax, IValueGenerator<T> itemsGenerator)
+			: this(seed, 0, Enumerable.Range(0, lengthMax).Select(_ => itemsGenerator))
 		{
 
 		}
@@ -38,12 +38,12 @@ namespace MockGenerators
 		/// </summary>
 		public IReadOnlyList<IValueGenerator<T>> ItemsGenerators { get; } = null;
 
-		public IEnumerable<T> Generate()
+		protected override IEnumerable<T> Generate(Random random)
 		{
-			var result = new T[Random.Next(LengthMin, ItemsGenerators.Count)];
+			var result = new T[random.Next(LengthMin, ItemsGenerators.Count)];
 			for (int i = 0; i < result.Length; i++)
 			{
-				result[i] = ItemsGenerators[i].Generate();
+				result[i] = ItemsGenerators[i].First();
 			}
 			return result;
 		}
