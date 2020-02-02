@@ -23,9 +23,16 @@ namespace MockGenerators.StringGenerators
 
 		protected override string Increment(string value)
 		{
-			var chars = value.ToCharArray();
-			Increment(chars);
-			return new string(chars);
+			if (value.Length > 0)
+			{
+				var chars = value.ToCharArray();
+				Increment(chars);
+				return new string(chars);
+			}
+			else
+			{
+				return StringBaseGenerator.UsedChars.First().ToString();
+			}
 		}
 
 		private char[] Increment(char[] chars)

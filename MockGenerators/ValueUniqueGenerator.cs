@@ -35,7 +35,7 @@ namespace MockGenerators
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			return new Enumerable(this);
+			return new Enumerator(this);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -43,47 +43,64 @@ namespace MockGenerators
 			return GetEnumerator();
 		}
 
-		private class Enumerable : IEnumerator<T>
+		private class Enumerator : IEnumerator<T>
 		{
-			public Enumerable(ValueUniqueGenerator<T> owner)
+			public Enumerator(ValueUniqueGenerator<T> owner)
 			{
 				Owner = owner ?? throw new NullReferenceException();
 				OldValues = new HashSet<T>(Owner.EqualityComparer);
+				EnumerableBase = Owner.BaseGenerator.GetEnumerator();
 			}
 
 			/// <summary>
 			/// Владелец итератора
 			/// </summary>
 			public ValueUniqueGenerator<T> Owner { get; } = null;
-
 			public T Current { get; private set; } = default;
-
 			object IEnumerator.Current => Current;
 
 			/// <summary>
 			/// Хеш ранее сгенерированых значений
 			/// </summary>
-			private HashSet<T> OldValues = null;
+			private HashSet<T> OldValues { get; } = null;
+			/// <summary>
+			/// Базовый счётчик коллекции
+			/// </summary>
+			private IEnumerator<T> EnumerableBase { get; } = null;
 
 			public bool MoveNext()
 			{
-				var current = Owner.BaseGenerator.First();
-				while (OldValues.Contains(current))
+				if (EnumerableBase.MoveNext())
 				{
-					current = Owner.Increment(current);
+					var current = EnumerableBase.Current;
+					while (OldValues.Contains(current))
+					{
+						current = Owner.Increment(current);
+					}
+					OldValues.Add(current);
+					Current = current;
+					return true;
 				}
-				Current = current;
-				return true;
+				return false;
 			}
 
 			public void Reset()
 			{
 				OldValues.Clear();
+				EnumerableBase.Reset();
 			}
 
 			public void Dispose()
 			{
-				
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			private void Dispose(bool disposing)
+			{
+				if (disposing)
+				{
+					EnumerableBase.Dispose();
+				}
 			}
 		}
 	}
