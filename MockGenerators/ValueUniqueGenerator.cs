@@ -10,9 +10,9 @@ namespace MockGenerators
 	/// Базовый объект для генерации уникальных значений
 	/// </summary>
 	/// <typeparam name="T">Тип генерируемых значений</typeparam>
-	public abstract class ValueUniqueGenerator<T> : IValueGenerator<T>
+	public class ValueUniqueGenerator<T> : IValueGenerator<T>
 	{
-		public ValueUniqueGenerator(IValueGenerator<T> baseGenerator, IEqualityComparer<T> equalityComparer = null)
+		public ValueUniqueGenerator(IValueDifferentGenerator<T> baseGenerator, IEqualityComparer<T> equalityComparer = null)
 		{
 			BaseGenerator = baseGenerator ?? throw new NullReferenceException(nameof(baseGenerator));
 			EqualityComparer = equalityComparer ?? EqualityComparer<T>.Default;
@@ -20,18 +20,11 @@ namespace MockGenerators
 		/// <summary>
 		/// Источник генерируемых значений
 		/// </summary>
-		public IValueGenerator<T> BaseGenerator { get; } = null;
+		public IValueDifferentGenerator<T> BaseGenerator { get; } = null;
 		/// <summary>
 		/// Объект сравнения значений
 		/// </summary>
 		public IEqualityComparer<T> EqualityComparer { get; } = null;
-
-		/// <summary>
-		/// Инкрементировать значение
-		/// </summary>
-		/// <param name="value">Текущее значение</param>
-		/// <returns>Инкрементированое значение</returns>
-		protected abstract T Increment(T value);
 
 		public IEnumerator<T> GetEnumerator()
 		{
@@ -73,10 +66,15 @@ namespace MockGenerators
 				if (EnumerableBase.MoveNext())
 				{
 					var current = EnumerableBase.Current;
-					while (OldValues.Contains(current))
+					if (OldValues.Contains(current))
 					{
-						current = Owner.Increment(current);
+						current = Owner.BaseGenerator.GetDifferent(OldValues);
+						if (OldValues.Contains(current))
+						{
+							throw new Exception();
+						}
 					}
+
 					OldValues.Add(current);
 					Current = current;
 					return true;
