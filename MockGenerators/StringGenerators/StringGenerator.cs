@@ -33,14 +33,12 @@ namespace MockGenerators.StringGenerators
 			: base(seed)
 		{
 			UsedChars = GetDefaultChars().ToArray();
-			CollectionGenerator = new CollectionGenerator<char>(seed, 0, MaxLength, new ItemProviderGenerator<char>(seed, UsedChars));
 		}
 		public StringGenerator(int seed, IEnumerable<char> usedChars, int maxLength)
 			: base(seed)
 		{
 			UsedChars = usedChars?.Distinct().ToArray() ?? throw new NullReferenceException();
 			MaxLength = maxLength >= 0 ? maxLength : throw new ArgumentOutOfRangeException();
-			CollectionGenerator = new CollectionGenerator<char>(seed, 0, MaxLength, new ItemProviderGenerator<char>(seed, UsedChars));
 		}
 		public StringGenerator(int seed, IEnumerable<char> usedChars)
 			: this(seed, usedChars, DEFAULT_MAX_LENGTH)
@@ -61,14 +59,15 @@ namespace MockGenerators.StringGenerators
 		/// Коллекция используемых символов при генерации
 		/// </summary>
 		public IReadOnlyList<char> UsedChars { get; } = null;
-		/// <summary>
-		/// Генератор символов
-		/// </summary>
-		private CollectionGenerator<char> CollectionGenerator { get; } = null;
 
 		protected override string Generate(Random random)
 		{
-			return new string(CollectionGenerator.First().ToArray());
+			var chars = new char[random.Next(0, MaxLength + 1)];
+			for (int i = 0; i < chars.Length; i++)
+			{
+				chars[i] = UsedChars[random.Next(UsedChars.Count)];
+			}
+			return new string(chars);
 		}
 	}
 }

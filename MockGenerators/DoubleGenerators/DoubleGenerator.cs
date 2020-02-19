@@ -9,6 +9,7 @@ namespace MockGenerators.DoubleGenerators
 		public DoubleGenerator(int seed)
 			: base(seed)
 		{
+			
 		}
 
 		protected override double Generate(Random random)

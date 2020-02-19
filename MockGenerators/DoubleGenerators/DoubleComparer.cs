@@ -23,15 +23,25 @@ namespace MockGenerators.DoubleGenerators
 		/// Погрешность сравнения
 		/// </summary>
 		public double Epsilon { get; } = 1;
+
+		public double Round(double value)
+		{
+			return Offset(value) * Epsilon;
+		}
 		
 		public bool Equals(double x, double y)
 		{
-			return Math.Floor(x / Epsilon) == Math.Floor(y / Epsilon);
+			return Offset(x) == Offset(y);
 		}
 
 		public int GetHashCode(double obj)
 		{
-			return Math.Floor(obj / Epsilon).GetHashCode();
+			return Offset(obj).GetHashCode();
+		}
+
+		public double Offset(double value)
+		{
+			return Math.Floor(value / Epsilon);
 		}
 	}
 }

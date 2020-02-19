@@ -5,9 +5,9 @@ namespace MockGenerators
 {
 	public struct Range<T>
 	{
-		public Range(T min, T max)
+		public Range(T min, T max, IComparer<T> comparer = null)
 		{
-			if (Comparer<T>.Default.Compare(min, max) > 0)
+			if ((comparer ?? Comparer<T>.Default).Compare(min, max) > 0)
 			{
 				throw new Exception();
 			}
